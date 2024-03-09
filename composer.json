@@ -1,0 +1,37 @@
+{
+    "name": "danilovl/doctrine-entity-dto-bundle",
+    "type": "symfony-bundle",
+    "description": "The Symfony bundle provides a simple mechanism to convert Doctrine entities to DTO objects.",
+    "keywords": ["php","symfony","bundle"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Vladimir Danilov"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Danilovl\\DoctrineEntityDtoBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Danilovl\\DoctrineEntityDtoBundle\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": "^8.3",
+        "symfony/framework-bundle": "^7.0",
+        "doctrine/doctrine-bundle": "^2",
+        "doctrine/orm": "^2.17",
+        "symfony/property-access": "^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.2"
+    },
+    "scripts": {
+        "phpstan": "phpstan analyse -c phpstan.neon src tests --no-progress",
+        "phpstan-generate-baseline": "@php vendor/bin/phpstan analyse --configuration phpstan.neon  src/ tests/ --generate-baseline",
+        "tests": "vendor/bin/phpunit tests"
+    }
+}

@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  php:
+    build:
+      context: ./
+      dockerfile: ./docker/php/Dockerfile
+    expose:
+      - '9000'
+    volumes:
+      - "./:/var/www/html/app"
+    working_dir: /var/www/html/app

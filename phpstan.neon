@@ -1,0 +1,13 @@
+includes:
+    - phpstan-baseline.neon
+
+parameters:
+ level: 9
+ paths:
+    - src
+    - tests
+ excludePaths:
+     - src/DependencyInjection/Extension/Configuration.php
+ treatPhpDocTypesAsCertain: false
+ checkMissingIterableValueType: false
+ checkGenericClassInNonGenericObjectType: false

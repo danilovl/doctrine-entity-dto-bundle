@@ -1,0 +1,56 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 1
+			path: src/Hydration/Entity/AbstractEntityHydration.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 1
+			path: src/Hydration/Entity/AbstractEntityHydration.php
+
+		-
+			message: "#^Cannot cast mixed to string\\.$#"
+			count: 3
+			path: src/Hydration/Entity/AbstractEntityHydration.php
+
+		-
+			message: "#^Parameter \\#1 \\$data of function unserialize expects string, mixed given\\.$#"
+			count: 1
+			path: src/Hydration/Entity/AbstractEntityHydration.php
+
+		-
+			message: "#^Parameter \\#1 \\$datetime of class DateTime constructor expects string, mixed given\\.$#"
+			count: 1
+			path: src/Hydration/Entity/AbstractEntityHydration.php
+
+		-
+			message: "#^Parameter \\#1 \\$datetime of class DateTimeImmutable constructor expects string, mixed given\\.$#"
+			count: 1
+			path: src/Hydration/Entity/AbstractEntityHydration.php
+
+		-
+			message: "#^Parameter \\#1 \\$duration of class DateInterval constructor expects string, mixed given\\.$#"
+			count: 1
+			path: src/Hydration/Entity/AbstractEntityHydration.php
+
+		-
+			message: "#^Parameter \\#1 \\$json of function json_decode expects string, mixed given\\.$#"
+			count: 1
+			path: src/Hydration/Entity/AbstractEntityHydration.php
+
+		-
+			message: "#^Parameter \\#1 \\$objectOrClass of class ReflectionClass constructor expects class\\-string\\<T of object\\>\\|T of object, string given\\.$#"
+			count: 1
+			path: src/Hydration/Entity/AbstractEntityHydration.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function md5 expects string, string\\|false given\\.$#"
+			count: 1
+			path: src/Hydration/Entity/AbstractEntityHydration.php
+
+		-
+			message: "#^Parameter \\#1 \\$objectOrClass of class ReflectionClass constructor expects class\\-string\\<T of object\\>\\|T of object, string given\\.$#"
+			count: 1
+			path: src/Hydration/Scalar/AbstractScalarHydration.php

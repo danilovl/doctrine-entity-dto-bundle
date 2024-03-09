@@ -1,0 +1,14 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: true
+
+  Danilovl\DoctrineEntityDtoBundle\:
+    resource: '../../../src'
+    exclude:
+      - '../../../src/Attribute'
+      - '../../../src/DependencyInjection'
+      - '../../../src/Exception'
+      - '../../../src/Hydration'
+      - '../../../src/Resources'
