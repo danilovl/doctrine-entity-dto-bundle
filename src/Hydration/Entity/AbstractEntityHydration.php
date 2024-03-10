@@ -3,14 +3,11 @@
 namespace Danilovl\DoctrineEntityDtoBundle\Hydration\Entity;
 
 use Danilovl\DoctrineEntityDtoBundle\Exception\LogicException;
-use DateInterval;
-use DateTime;
-use DateTimeImmutable;
 use Doctrine\Common\Collections\{
     Collection,
     ArrayCollection
 };
-use Doctrine\DBAL\Types\Types;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Internal\Hydration\AbstractHydrator as BaseAbstractHydration;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -91,7 +88,7 @@ class AbstractEntityHydration extends BaseAbstractHydration
 
                 $fieldName = $resultSetMapping->fieldMappings[$rowKey];
 
-                $finalValue = $this->getValue($fieldName, $value, $this->dtoClass);
+                $finalValue = $this->getValue($rowKey, $value);
                 $this->propertyAccessor->setValue($dto, $fieldName, $finalValue);
             }
 
@@ -178,12 +175,8 @@ class AbstractEntityHydration extends BaseAbstractHydration
         }
     }
 
-    protected function setRowValuesToEntity(
-        array $rowKeys,
-        array $row,
-        object $object,
-        string $targetEntity
-    ): bool {
+    protected function setRowValuesToEntity(array $rowKeys, array $row, object $object): bool
+    {
         /** @var ResultSetMapping $resultSetMapping */
         $resultSetMapping = $this->_rsm;
         $isSetValue = false;
@@ -195,7 +188,7 @@ class AbstractEntityHydration extends BaseAbstractHydration
             }
 
             $fieldName = $resultSetMapping->fieldMappings[$rowKey];
-            $finalValue = $this->getValue($fieldName, $value, $targetEntity);
+            $finalValue = $this->getValue($rowKey, $value);
             $this->propertyAccessor->setValue($object, $fieldName, $finalValue);
 
             $isSetValue = true;
@@ -204,66 +197,12 @@ class AbstractEntityHydration extends BaseAbstractHydration
         return $isSetValue;
     }
 
-    protected function getValue(string $key, mixed $value, string $dtoClass): mixed
+    protected function getValue(string $rowKey, mixed $value): mixed
     {
-        $types = $this->_metadataCache[$dtoClass]->fieldMappings[$key];
+        /** @var Type|null $type */
+        $type = $this->hydrateColumnInfo($rowKey)['type'] ?? null;
 
-        /** @var string $type */
-        $type = $types['type'] ?? null;
-
-        if ($type === null) {
-            return $value;
-        }
-
-        if ($type === Types::JSON) {
-            return json_decode($value, true, 512, JSON_THROW_ON_ERROR);
-        }
-
-        if ($type === Types::BOOLEAN) {
-            return (bool) $value;
-        }
-
-        if (in_array($type, [Types::DECIMAL, Types::FLOAT], true)) {
-            return (float) $value;
-        }
-
-        if (in_array($type, [Types::INTEGER, Types::SMALLINT, Types::BIGINT], true)) {
-            return (int) $value;
-        }
-
-        if (in_array($type, [Types::STRING, Types::TEXT, Types::ASCII_STRING], true)) {
-            return (string) $value;
-        }
-
-        if (in_array($type, [Types::DATE_MUTABLE, Types::DATETIME_MUTABLE, Types::DATETIMETZ_MUTABLE], true)) {
-            return new DateTime($value);
-        }
-
-        if (in_array($type, [Types::DATETIME_IMMUTABLE, Types::DATE_IMMUTABLE, Types::DATETIMETZ_IMMUTABLE], true)) {
-            return new DateTimeImmutable($value);
-        }
-
-        if ($type === Types::DATEINTERVAL) {
-            return new DateInterval($value);
-        }
-
-        if ($type === Types::BINARY || $type === Types::BLOB) {
-            return (binary) $value;
-        }
-
-        if ($type === Types::GUID) {
-            return (string) $value;
-        }
-
-        if ($type === Types::ARRAY || $type === Types::SIMPLE_ARRAY) {
-            return (array) $value;
-        }
-
-        if ($type === Types::OBJECT) {
-            return unserialize($value);
-        }
-
-        return $value;
+        return $type !== null ? $type->convertToPHPValue($value, $this->_platform) : $value;
     }
 
     protected function getPrimaryId(array $row, array $data, string $entityMappingsKey): string|int

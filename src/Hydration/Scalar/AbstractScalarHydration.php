@@ -4,6 +4,7 @@ namespace Danilovl\DoctrineEntityDtoBundle\Hydration\Scalar;
 
 use Danilovl\DoctrineEntityDtoBundle\Exception\LogicException;
 use Danilovl\DoctrineEntityDtoBundle\Service\ConfigurationService;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Internal\Hydration\AbstractHydrator as BaseAbstractHydration;
 use Symfony\Component\PropertyAccess\{
@@ -53,7 +54,7 @@ class AbstractScalarHydration extends BaseAbstractHydration
             throw new LogicException('DTO class is not in scalar DTOs.');
         }
 
-        $data = $this->gatherScalarRowData($row);
+        $data = $this->prepareRowData($row);
 
         $reflectionClass = new ReflectionClass(self::$dtoClass);
         $reflectionConstructor = $reflectionClass->getConstructor();
@@ -69,5 +70,25 @@ class AbstractScalarHydration extends BaseAbstractHydration
         }
 
         $result[] = $dto;
+    }
+
+    protected function prepareRowData(array $row): array
+    {
+        $result = [];
+
+        foreach ($row as $key => $value) {
+            $cacheKeyInfo = $this->hydrateColumnInfo($key);
+            if ($cacheKeyInfo === null) {
+                continue;
+            }
+
+            $fieldName = $cacheKeyInfo['fieldName'];
+            /** @var Type $type */
+            $type = $cacheKeyInfo['type'];
+
+            $result[$fieldName] = $type->convertToPHPValue($value, $this->_platform);
+        }
+
+        return $result;
     }
 }
