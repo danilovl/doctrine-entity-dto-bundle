@@ -146,8 +146,11 @@ class AbstractEntityHydration extends BaseAbstractHydration
                 $reflectionClass = new ReflectionClass($targetEntity);
                 $childEntity = $reflectionClass->newInstanceWithoutConstructor();
 
-                $this->setRowValuesToEntity($rowKeys, $row, $childEntity, $targetEntity);
-                $collection->add($childEntity);
+                $isSetValue = $this->setRowValuesToEntity($rowKeys, $row, $childEntity, $targetEntity);
+
+                if ($isSetValue) {
+                    $collection->add($childEntity);
+                }
 
                 if (is_array($children)) {
                     $this->createChildDTO($children, $data, $row, $childEntity);
@@ -164,8 +167,10 @@ class AbstractEntityHydration extends BaseAbstractHydration
                 $childEntity = $this->propertyAccessor->getValue($parentObject, $relationFieldName);
             }
 
-            $this->setRowValuesToEntity($rowKeys, $row, $childEntity, $targetEntity);
-            $this->propertyAccessor->setValue($parentObject, $relationFieldName, $childEntity);
+            $isSetValue = $this->setRowValuesToEntity($rowKeys, $row, $childEntity, $targetEntity);
+            if ($isSetValue) {
+                $this->propertyAccessor->setValue($parentObject, $relationFieldName, $childEntity);
+            }
 
             if (is_array($children)) {
                 $this->createChildDTO($children, $data, $row, $childEntity);
@@ -178,9 +183,10 @@ class AbstractEntityHydration extends BaseAbstractHydration
         array $row,
         object $object,
         string $targetEntity
-    ): void {
+    ): bool {
         /** @var ResultSetMapping $resultSetMapping */
         $resultSetMapping = $this->_rsm;
+        $isSetValue = false;
 
         foreach ($rowKeys as $rowKey) {
             $value = $row[$rowKey];
@@ -191,7 +197,11 @@ class AbstractEntityHydration extends BaseAbstractHydration
             $fieldName = $resultSetMapping->fieldMappings[$rowKey];
             $finalValue = $this->getValue($fieldName, $value, $targetEntity);
             $this->propertyAccessor->setValue($object, $fieldName, $finalValue);
+
+            $isSetValue = true;
         }
+
+        return $isSetValue;
     }
 
     protected function getValue(string $key, mixed $value, string $dtoClass): mixed
@@ -260,9 +270,12 @@ class AbstractEntityHydration extends BaseAbstractHydration
     {
         /** @var ResultSetMapping $resultSetMapping */
         $resultSetMapping = $this->_rsm;
-
+        $mappingsKeyData = $data[$entityMappingsKey];
         $primaryId = null;
-        foreach ($row as $key => $value) {
+
+        foreach ($mappingsKeyData as $key) {
+            $value = $row[$key];
+
             $columnInfo = $this->hydrateColumnInfo($key);
             $declaringClass = $resultSetMapping->getDeclaringClass($key);
             if ($this->dtoClass !== $declaringClass && $primaryId) {
