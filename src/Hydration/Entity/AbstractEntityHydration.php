@@ -77,8 +77,7 @@ class AbstractEntityHydration extends BaseAbstractHydration
         $dto = $result[$resultKey] ?? null;
 
         if ($dto === null) {
-            $reflectionClass = new ReflectionClass($this->dtoClass);
-            $dto = $reflectionClass->newInstanceWithoutConstructor();
+            $dto = $this->createClassInstance($this->dtoClass);
             $result[$resultKey] = $dto;
         }
 
@@ -143,9 +142,7 @@ class AbstractEntityHydration extends BaseAbstractHydration
                     $this->propertyAccessor->setValue($parentObject, $relationFieldName, $collection);
                 }
 
-                $reflectionClass = new ReflectionClass($targetEntity);
-                $childEntity = $reflectionClass->newInstanceWithoutConstructor();
-
+                $childEntity = $this->createClassInstance($targetEntity);
                 $isSetValue = $this->setRowValuesToEntity($rowKeys, $row, $childEntity, $targetEntity);
 
                 if ($isSetValue) {
@@ -160,11 +157,14 @@ class AbstractEntityHydration extends BaseAbstractHydration
             }
 
             if (!$isReadable) {
-                $reflectionClass = new ReflectionClass($targetEntity);
-                $childEntity = $reflectionClass->newInstanceWithoutConstructor();
+                $childEntity = $this->createClassInstance($targetEntity);
             } else {
                 /** @var object $childEntity */
                 $childEntity = $this->propertyAccessor->getValue($parentObject, $relationFieldName);
+
+                if ($childEntity === null) {
+                    $childEntity = $this->createClassInstance($targetEntity);
+                }
             }
 
             $isSetValue = $this->setRowValuesToEntity($rowKeys, $row, $childEntity, $targetEntity);
@@ -321,5 +321,10 @@ class AbstractEntityHydration extends BaseAbstractHydration
 
         $entityMappingsKey = array_key_first($resultSetMapping->entityMappings);
         $this->dtoClass = $resultSetMapping->aliasMap[$entityMappingsKey];
+    }
+
+    protected function createClassInstance(string $class): object
+    {
+        return (new ReflectionClass($class))->newInstanceWithoutConstructor();
     }
 }
