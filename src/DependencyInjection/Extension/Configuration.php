@@ -22,6 +22,7 @@ class Configuration implements ConfigurationInterface
                     ->prototype('scalar')->end()
                 ->end()
                 ->scalarNode('isEnableScalarDTO')->defaultFalse()->end()
+                ->scalarNode('isAsScalarDTO')->defaultFalse()->end()
                 ->arrayNode('scalarDTO')
                     ->prototype('scalar')->end()
                 ->end()

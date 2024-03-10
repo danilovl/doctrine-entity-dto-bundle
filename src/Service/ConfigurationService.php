@@ -2,9 +2,7 @@
 
 namespace Danilovl\DoctrineEntityDtoBundle\Service;
 
-use Symfony\Component\HttpKernel\Bundle\Bundle;
-
-class ConfigurationService extends Bundle
+class ConfigurationService
 {
     private static array $scalarDTOs = [];
 
@@ -13,13 +11,19 @@ class ConfigurationService extends Bundle
         public readonly bool $isAsEntityDTO = false,
         public readonly array $entityDTO = [],
         public readonly bool $isEnableScalarDTO = false,
+        public readonly bool $isAsScalarDTO = false,
         public readonly array $scalarDTO = []
     ) {
         self::$scalarDTOs = $scalarDTO;
     }
 
-    public static function getscalarDTO(): array
+    public static function getScalarDTO(): array
     {
         return self::$scalarDTOs;
+    }
+
+    public static function setScalarDTOs(array $scalarDTOs): void
+    {
+        self::$scalarDTOs = $scalarDTOs;
     }
 }

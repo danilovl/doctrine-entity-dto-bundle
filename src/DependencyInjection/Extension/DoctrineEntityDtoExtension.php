@@ -26,6 +26,7 @@ class DoctrineEntityDtoExtension extends Extension
             $config['isAsEntityDTO'],
             $config['entityDTO'],
             $config['isEnableScalarDTO'],
+            $config['isAsScalarDTO'],
             $config['scalarDTO']
         ]);
     }

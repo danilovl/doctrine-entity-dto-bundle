@@ -47,6 +47,7 @@ danilovl_doctrine_entity_dto:
   entityDTO: []
   
   isEnableScalarDTO: false
+  isAsScalarDTO: false
   scalarDTO: []
 ```
 
@@ -54,14 +55,14 @@ danilovl_doctrine_entity_dto:
 
 #### 3.1 Entity DTO
 
-The `DoctrineEntityDtoBundle` automatically creates Doctrine entity hydration for every entity class names if `isEnableEntityDTO` is true.
+The `DoctrineEntityDtoBundle` automatically creates doctrine hydration for every entity class names if `isEnableEntityDTO` is true.
 
 ```yaml
 danilovl_doctrine_entity_dto:
   isEnableEntityDTO: true
 ```
 
-You can add a control attribute `isAsEntityDTO` that only Doctrine entities with this attribute will create DTO hydration.
+You can add a control attribute `isAsEntityDTO` that only entities with this attribute will create DTO hydration.
 
 ```yaml
 danilovl_doctrine_entity_dto:
@@ -145,14 +146,33 @@ array:2 [▼
 
 #### 3.2 Scalar DTO
 
-To use scalar DTOs, you need to add the namespace of the DTO class to the configuration.
+If `isAsScalarDTO` is true, it automatically scans the `src` project directory for every file, trying to find a class with the attribute `AsScalarDTO`.
+
+When you use the `AsScalarDTO` attribute, the results of namespaces are cached for `prod` environment.
+
+```yaml
+danilovl_doctrine_entity_dto:
+  isEnableScalarDTO: true
+  isAsScalarDTO: true
+```
+
+You can declare your own list of namespaces for the DTO class in the configuration without using the attribute.
 
 ```yaml
 danilovl_doctrine_entity_dto:
   isEnableScalarDTO: true
   scalarDTO:
     - App\Domain\Cheque\EntityDTO\ChequeDTO
+```
 
+Alternatively, you can combine the attribute and list. The final result will be merged.
+
+```yaml
+danilovl_doctrine_entity_dto:
+  isEnableScalarDTO: true
+  isAsScalarDTO: true
+  scalarDTO:
+    - App\Domain\Cheque\EntityDTO\ChequeDTO
 ```
 
 Example of `ChequeDTO`.
@@ -162,6 +182,9 @@ Example of `ChequeDTO`.
 
 namespace App\Domain\Cheque\EntityDTO;
 
+use Danilovl\DoctrineEntityDtoBundle\Attribute\AsScalarDTO;
+
+#[AsScalarDTO]
 class ChequeDTO
 {
     public function __construct(

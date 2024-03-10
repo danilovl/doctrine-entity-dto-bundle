@@ -50,7 +50,7 @@ class AbstractScalarHydration extends BaseAbstractHydration
         if (self::$dtoClass === null) {
             throw new LogicException('DTO class is not set.');
         }
-        if (!in_array(self::$dtoClass, ConfigurationService::getscalarDTO(), true)) {
+        if (!in_array(self::$dtoClass, ConfigurationService::getScalarDTO(), true)) {
             throw new LogicException('DTO class is not in scalar DTOs.');
         }
 
