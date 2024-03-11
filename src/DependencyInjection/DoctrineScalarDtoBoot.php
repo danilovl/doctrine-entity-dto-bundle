@@ -36,7 +36,7 @@ class DoctrineScalarDtoBoot
             $entityManager->getConfiguration()->addCustomHydrationMode($dto, ScalarHydration::class);
         }
 
-        ConfigurationService::setScalarDTOs($scalarDTO);
+        ConfigurationService::setScalarDTO($scalarDTO);
     }
 
     private function processDirectory(ContainerInterface $container): array

@@ -23,6 +23,7 @@ class DoctrineEntityDtoExtension extends Extension
         $configurationService = $container->getDefinition(ConfigurationService::class);
         $configurationService->setArguments([
             $config['isEnableEntityDTO'],
+            $config['isEnableEntityRuntimeNameDTO'],
             $config['isAsEntityDTO'],
             $config['entityDTO'],
             $config['isEnableScalarDTO'],

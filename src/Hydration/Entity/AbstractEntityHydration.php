@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\{
     Collection,
     ArrayCollection
 };
+use Danilovl\DoctrineEntityDtoBundle\Service\ConfigurationService;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Internal\Hydration\AbstractHydrator as BaseAbstractHydration;
@@ -124,7 +125,13 @@ class AbstractEntityHydration extends BaseAbstractHydration
             $targetEntity = $resultSetMapping->aliasMap[$parentFieldName];
             $relationFieldName = $resultSetMapping->relationMap[$parentFieldName];
 
-            $mapping = $this->_metadataCache[get_class($parentObject)];
+            /** @var string $parentObjectClassName */
+            $parentObjectClassName = get_class($parentObject);
+            if (str_contains($parentObjectClassName, $this->getRuntimeClassSuffix())) {
+                $parentObjectClassName = get_parent_class($parentObject);
+            }
+
+            $mapping = $this->_metadataCache[$parentObjectClassName];
             $associationMapping = $mapping->associationMappings[$relationFieldName] ?? null;
 
             $isReadable = $this->propertyAccessor->isReadable($parentObject, $relationFieldName);
@@ -259,7 +266,27 @@ class AbstractEntityHydration extends BaseAbstractHydration
         $resultSetMapping = $this->_rsm;
 
         $entityMappingsKey = array_key_first($resultSetMapping->entityMappings);
-        $this->dtoClass = $resultSetMapping->aliasMap[$entityMappingsKey];
+        $entityClass = $resultSetMapping->aliasMap[$entityMappingsKey];
+        $this->dtoClass = $entityClass;
+
+        if (!ConfigurationService::getIsEnableEntityRuntimeNameDTO()) {
+            return;
+        }
+
+        $shortName = (new ReflectionClass($entityClass))->getShortName();
+        $this->dtoClass = sprintf('%s%s', $shortName, $this->getRuntimeClassSuffix());
+
+        if (class_exists($this->dtoClass)) {
+            return;
+        }
+
+        $classDefinition = sprintf('class %s extends %s {};', $this->dtoClass, $entityClass);
+        eval($classDefinition);
+    }
+
+    protected function getRuntimeClassSuffix(): string
+    {
+        return 'RuntimeDTO';
     }
 
     protected function createClassInstance(string $class): object

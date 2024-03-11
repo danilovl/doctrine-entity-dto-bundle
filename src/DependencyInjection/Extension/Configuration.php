@@ -17,6 +17,7 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->scalarNode('isEnableEntityDTO')->defaultFalse()->end()
+                ->scalarNode('isEnableEntityRuntimeNameDTO')->defaultFalse()->end()
                 ->scalarNode('isAsEntityDTO')->defaultFalse()->end()
                 ->arrayNode('entityDTO')
                     ->prototype('scalar')->end()

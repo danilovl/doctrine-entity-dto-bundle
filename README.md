@@ -43,6 +43,7 @@ Default configuration.
 ```yaml
 danilovl_doctrine_entity_dto:
   isEnableEntityDTO: false
+  isEnableEntityRuntimeNameDTO: false
   isAsEntityDTO: false
   entityDTO: []
   
@@ -130,6 +131,41 @@ array:2 [▼
     #updatedAt: DateTime @1489878000 {#1071 ▶}
   }
   1 => App\Domain\Cheque\Entity\Cheque {#1094 ▼
+    +price: "311.27"
+    +chequeNumber: "0019-20170318-05-9278"
+    +shop: App\Domain\Shop\Entity\Shop {#1141 ▶}
+    +currency: ? App\Domain\Currency\Entity\Currency
+    +orderList: ? Doctrine\Common\Collections\Collection
+    +walletTransaction: ? App\Domain\Wallet\Entity\WalletTransaction
+    #id: 5
+    #date: DateTime @1489791600 {#1142 ▶}
+    #createdAt: DateTime @1489791600 {#1139 ▶}
+    #updatedAt: DateTime @1489791600 {#1138 ▶}
+  }
+]
+```
+
+If you want the name of the DTO class to be different from the entity class name, use the parameter `isEnableEntityRuntimeNameDTO`.
+
+It creates the name based on the pattern `%sRuntimeDTO`.
+
+Note that this feature utilizes the `eval` function.
+
+```php
+array:2 [▼
+  0 => ChequeRuntimeDTO {#1107 ▼
+    +price: "105.4"
+    +chequeNumber: "0119-201703119-02-9380"
+    +shop: App\Domain\Shop\Entity\Shop {#1091 ▶}
+    +currency: ? App\Domain\Currency\Entity\Currency
+    +orderList: ? Doctrine\Common\Collections\Collection
+    +walletTransaction: ? App\Domain\Wallet\Entity\WalletTransaction
+    #id: 4
+    #date: DateTime @1489878000 {#1083 ▶}
+    #createdAt: DateTime @1489878000 {#1081 ▶}
+    #updatedAt: DateTime @1489878000 {#1071 ▶}
+  }
+  1 => ChequeRuntimeDTO {#1094 ▼
     +price: "311.27"
     +chequeNumber: "0019-20170318-05-9278"
     +shop: App\Domain\Shop\Entity\Shop {#1141 ▶}
