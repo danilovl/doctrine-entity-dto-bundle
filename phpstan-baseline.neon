@@ -1,11 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Method Danilovl\\\\DoctrineEntityDtoBundle\\\\Hydration\\\\Entity\\\\AbstractEntityHydration\\:\\:setRowValuesToEntity\\(\\) invoked with 4 parameters, 3 required\\.$#"
-			count: 2
-			path: src/Hydration/Entity/AbstractEntityHydration.php
-
-		-
 			message: "#^Parameter \\#1 \\$objectOrClass of class ReflectionClass constructor expects class\\-string\\<T of object\\>\\|T of object, string given\\.$#"
 			count: 1
 			path: src/Hydration/Entity/AbstractEntityHydration.php

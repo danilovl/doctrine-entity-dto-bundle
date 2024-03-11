@@ -25,6 +25,8 @@ class AbstractEntityHydration extends BaseAbstractHydration
 
     protected string $dtoClass;
 
+    protected array $collectionMapping = [];
+
     public function __construct(EntityManagerInterface $entityManager)
     {
         parent::__construct($entityManager);
@@ -147,7 +149,16 @@ class AbstractEntityHydration extends BaseAbstractHydration
                 }
 
                 $childEntity = $this->createClassInstance($targetEntity);
-                $isSetValue = $this->setRowValuesToEntity($rowKeys, $row, $childEntity, $targetEntity);
+                $isSetValue = $this->setRowValuesToEntity($rowKeys, $row, $childEntity);
+
+                $identifier = $this->getPrimaryId($row, $data, $parentFieldName);
+                $isInCollection = $this->collectionMapping[$parentObjectClassName][$targetEntity][$identifier] ?? null;
+
+                if ($isInCollection) {
+                    continue;
+                } else {
+                    $this->collectionMapping[$parentObjectClassName][$targetEntity][$identifier] = true;
+                }
 
                 if ($isSetValue) {
                     $collection->add($childEntity);
@@ -171,7 +182,7 @@ class AbstractEntityHydration extends BaseAbstractHydration
                 }
             }
 
-            $isSetValue = $this->setRowValuesToEntity($rowKeys, $row, $childEntity, $targetEntity);
+            $isSetValue = $this->setRowValuesToEntity($rowKeys, $row, $childEntity);
             if ($isSetValue) {
                 $this->propertyAccessor->setValue($parentObject, $relationFieldName, $childEntity);
             }
