@@ -20,7 +20,7 @@ The Symfony bundle provides a simple mechanism to convert Doctrine entities to D
 Install `danilovl/doctrine-entity-dto-bundle` package by Composer:
 
 ``` bash
-$ composer require danilovl/doctrine-entity-dto-bundle
+composer require danilovl/doctrine-entity-dto-bundle
 ```
 Add the `DoctrineEntityDtoBundle` to your application's bundles if it does not add automatically:
 
