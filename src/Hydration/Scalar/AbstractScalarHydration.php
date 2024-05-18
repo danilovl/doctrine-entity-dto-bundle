@@ -43,21 +43,28 @@ class AbstractScalarHydration extends BaseAbstractHydration
 
     protected function hydrateRowData(array $row, array &$result): void
     {
-        if (empty($this->_rsm->scalarMappings)) {
-            throw new LogicException('Hydration of entity values is not supported.');
-        }
-
         if (self::$dtoClass === null) {
             throw new LogicException('DTO class is not set.');
         }
+
         if (!in_array(self::$dtoClass, ConfigurationService::getScalarDTO(), true)) {
             throw new LogicException('DTO class is not in scalar DTOs.');
         }
 
-        $data = $this->prepareRowData($row);
+		$rowData = $this->prepareRowData($row);
 
-        $reflectionClass = new ReflectionClass(self::$dtoClass);
-        $reflectionConstructor = $reflectionClass->getConstructor();
+		$reflectionClass = new ReflectionClass(self::$dtoClass);
+		$reflectionConstructor = $reflectionClass->getConstructor();
+
+		$data = [];
+		foreach ($reflectionClass->getProperties() as $property) {
+			$propertyName = $property->getName();
+			if (!array_key_exists($propertyName, $rowData)) {
+				continue;
+			}
+
+			$data[$propertyName] = $rowData[$propertyName];
+		}
 
         if ($reflectionConstructor) {
             $dto = $reflectionClass->newInstance(...$data);
@@ -82,9 +89,16 @@ class AbstractScalarHydration extends BaseAbstractHydration
                 continue;
             }
 
+            /** @var string $fieldName */
             $fieldName = $cacheKeyInfo['fieldName'];
             /** @var Type $type */
             $type = $cacheKeyInfo['type'];
+
+            if (array_key_exists($fieldName, $result)) {
+                $message = sprintf('Already exists field "%s" in result. Field name must be unique. Use AS operator', $fieldName);
+
+                throw new LogicException($message);
+            }
 
             $result[$fieldName] = $type->convertToPHPValue($value, $this->_platform);
         }
