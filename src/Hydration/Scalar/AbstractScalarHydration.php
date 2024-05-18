@@ -51,20 +51,20 @@ class AbstractScalarHydration extends BaseAbstractHydration
             throw new LogicException('DTO class is not in scalar DTOs.');
         }
 
-		$rowData = $this->prepareRowData($row);
+        $rowData = $this->prepareRowData($row);
 
-		$reflectionClass = new ReflectionClass(self::$dtoClass);
-		$reflectionConstructor = $reflectionClass->getConstructor();
+        $reflectionClass = new ReflectionClass(self::$dtoClass);
+        $reflectionConstructor = $reflectionClass->getConstructor();
 
-		$data = [];
-		foreach ($reflectionClass->getProperties() as $property) {
-			$propertyName = $property->getName();
-			if (!array_key_exists($propertyName, $rowData)) {
-				continue;
-			}
+        $data = [];
+        foreach ($reflectionClass->getProperties() as $property) {
+            $propertyName = $property->getName();
+            if (!array_key_exists($propertyName, $rowData)) {
+                continue;
+            }
 
-			$data[$propertyName] = $rowData[$propertyName];
-		}
+            $data[$propertyName] = $rowData[$propertyName];
+        }
 
         if ($reflectionConstructor) {
             $dto = $reflectionClass->newInstance(...$data);

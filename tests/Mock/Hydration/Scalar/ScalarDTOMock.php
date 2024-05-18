@@ -6,13 +6,13 @@ use DateTime;
 
 class ScalarDTOMock
 {
-	public function __construct(
-		public readonly int $id,
-		public readonly bool $active,
-		public readonly string $name,
-		public readonly ?string $description,
-		public readonly bool $complete,
-		public readonly bool $notifyComplete,
-		public readonly ?DateTime $deadline
-	) {}
+    public function __construct(
+        public readonly int $id,
+        public readonly bool $active,
+        public readonly string $name,
+        public readonly ?string $description,
+        public readonly bool $complete,
+        public readonly bool $notifyComplete,
+        public readonly ?DateTime $deadline
+    ) {}
 }
