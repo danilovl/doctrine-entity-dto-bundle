@@ -111,6 +111,6 @@ class DoctrineScalarDtoBoot
 
     private function getCacheKey(): string
     {
-        return 'DoctrineEntityDtoBundle:scalarDTO';
+        return 'DoctrineEntityDtoBundle_scalarDTO';
     }
 }
