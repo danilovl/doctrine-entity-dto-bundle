@@ -273,6 +273,13 @@ if you want to create DTO objects as a result, simply add the class using the `s
 $this->paginator->paginate($query->setHydrationMode(class::class));
 ```
 
+If use Gedmo Translatable DoctrineExtensions additionally needed `setHint`.
+
+```php
+$query->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslationWalker::class);
+$query->setHydrationMode(Product::class);
+```
+
 ## License
 
 The DoctrineEntityDtoBundle is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
