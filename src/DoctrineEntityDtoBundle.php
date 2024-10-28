@@ -22,7 +22,7 @@ class DoctrineEntityDtoBundle extends Bundle
         /** @var ContainerInterface $container */
         $container = $this->container;
 
-        (new DoctrineEntityDtoBoot())->boot($container);
-        (new DoctrineScalarDtoBoot())->boot($container);
+        (new DoctrineEntityDtoBoot)->boot($container);
+        (new DoctrineScalarDtoBoot)->boot($container);
     }
 }

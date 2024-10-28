@@ -2,6 +2,4 @@
 
 namespace Danilovl\DoctrineEntityDtoBundle\Exception;
 
-class LogicException extends \LogicException
-{
-}
+class LogicException extends \LogicException {}

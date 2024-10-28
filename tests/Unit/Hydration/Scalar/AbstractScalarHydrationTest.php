@@ -20,6 +20,7 @@ use stdClass;
 class AbstractScalarHydrationTest extends TestCase
 {
     private ResultSetMapping $resultSetMapping;
+
     private AbstractScalarHydrationMock $abstractScalarHydrationMock;
 
     protected function setUp(): void
