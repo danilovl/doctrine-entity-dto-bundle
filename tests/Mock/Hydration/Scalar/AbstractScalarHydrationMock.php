@@ -4,14 +4,15 @@ namespace Danilovl\DoctrineEntityDtoBundle\Tests\Mock\Hydration\Scalar;
 
 use Danilovl\DoctrineEntityDtoBundle\Hydration\Scalar\AbstractScalarHydration;
 use Doctrine\DBAL\Platforms\MySQL80Platform;
-use Doctrine\DBAL\Types\BooleanType;
-use Doctrine\DBAL\Types\DateTimeType;
-use Doctrine\DBAL\Types\DateType;
-use Doctrine\DBAL\Types\IntegerType;
-use Doctrine\DBAL\Types\StringType;
-use Doctrine\DBAL\Types\TextType;
+use Doctrine\DBAL\Types\{
+    DateType,
+    TextType,
+    StringType,
+    BooleanType,
+    DateTimeType,
+    IntegerType
+};
 use Doctrine\ORM\Query\ResultSetMapping;
-
 
 class AbstractScalarHydrationMock extends AbstractScalarHydration
 {
