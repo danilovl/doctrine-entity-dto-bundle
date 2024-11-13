@@ -5,12 +5,12 @@ namespace Danilovl\DoctrineEntityDtoBundle\Tests\Unit\Hydration\Scalar;
 use ArgumentCountError;
 use Danilovl\DoctrineEntityDtoBundle\Exception\LogicException;
 use Danilovl\DoctrineEntityDtoBundle\Service\ConfigurationService;
+use Doctrine\DBAL\Platforms\MySQL84Platform;
 use Danilovl\DoctrineEntityDtoBundle\Tests\Mock\Hydration\Scalar\{
     ScalarDTOMock,
     AbstractScalarHydrationMock
 };
 use DateTime;
-use Doctrine\DBAL\Platforms\MySQL80Platform;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -71,7 +71,7 @@ class AbstractScalarHydrationTest extends TestCase
             'updated_at_8' => ScalarDTOMock::class
         ];
 
-        $platform = new MySQL80Platform;
+        $platform = new MySQL84Platform;
         $this->abstractScalarHydrationMock = new AbstractScalarHydrationMock($this->resultSetMapping, $platform);
     }
 

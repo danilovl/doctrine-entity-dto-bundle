@@ -3,7 +3,6 @@
 namespace Danilovl\DoctrineEntityDtoBundle\Tests\Mock\Hydration\Scalar;
 
 use Danilovl\DoctrineEntityDtoBundle\Hydration\Scalar\AbstractScalarHydration;
-use Doctrine\DBAL\Platforms\MySQL80Platform;
 use Doctrine\DBAL\Types\{
     DateType,
     TextType,
@@ -12,14 +11,15 @@ use Doctrine\DBAL\Types\{
     DateTimeType,
     IntegerType
 };
+use Doctrine\DBAL\Platforms\MySQL84Platform;
 use Doctrine\ORM\Query\ResultSetMapping;
 
 class AbstractScalarHydrationMock extends AbstractScalarHydration
 {
-    public function __construct(ResultSetMapping $rsm, MySQL80Platform $platform)
+    public function __construct(ResultSetMapping $rsm, MySQL84Platform $platform)
     {
-        $this->_rsm = $rsm;
-        $this->_platform = $platform;
+        $this->rsm = $rsm;
+        $this->platform = $platform;
     }
 
     public function publicHydrateRowData(array $row, array &$result): void
@@ -27,7 +27,7 @@ class AbstractScalarHydrationMock extends AbstractScalarHydration
         $this->hydrateRowData($row, $result);
     }
 
-    protected function hydrateColumnInfo($key): mixed
+    protected function hydrateColumnInfo($key): ?array
     {
         $columnInfo = [
             'complete_0' => [

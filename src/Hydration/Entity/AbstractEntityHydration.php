@@ -27,9 +27,9 @@ class AbstractEntityHydration extends BaseAbstractHydration
 
     protected array $collectionMapping = [];
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $em)
     {
-        parent::__construct($entityManager);
+        parent::__construct($em);
 
         $this->propertyAccessor = PropertyAccess::createPropertyAccessorBuilder()
             ->enableMagicMethods()
@@ -50,7 +50,7 @@ class AbstractEntityHydration extends BaseAbstractHydration
     protected function hydrateRowData(array $row, array &$result): void
     {
         /** @var ResultSetMapping $resultSetMapping */
-        $resultSetMapping = $this->_rsm;
+        $resultSetMapping = $this->rsm;
 
         if (!empty($resultSetMapping->scalarMappings)) {
             throw new LogicException('Hydration of scalar values is not supported.');
@@ -119,7 +119,7 @@ class AbstractEntityHydration extends BaseAbstractHydration
     protected function createChildDTO(array $tree, array $data, array $row, object $parentObject): void
     {
         /** @var ResultSetMapping $resultSetMapping */
-        $resultSetMapping = $this->_rsm;
+        $resultSetMapping = $this->rsm;
 
         foreach ($tree as $parentFieldName => $children) {
             /** @var array $rowKeys */
@@ -133,7 +133,7 @@ class AbstractEntityHydration extends BaseAbstractHydration
                 $parentObjectClassName = get_parent_class($parentObject);
             }
 
-            $mapping = $this->_metadataCache[$parentObjectClassName];
+            $mapping = $this->metadataCache[$parentObjectClassName];
             $associationMapping = $mapping->associationMappings[$relationFieldName] ?? null;
 
             $isReadable = $this->propertyAccessor->isReadable($parentObject, $relationFieldName);
@@ -196,7 +196,7 @@ class AbstractEntityHydration extends BaseAbstractHydration
     protected function setRowValuesToEntity(array $rowKeys, array $row, object $object): bool
     {
         /** @var ResultSetMapping $resultSetMapping */
-        $resultSetMapping = $this->_rsm;
+        $resultSetMapping = $this->rsm;
         $isSetValue = false;
 
         foreach ($rowKeys as $rowKey) {
@@ -220,13 +220,13 @@ class AbstractEntityHydration extends BaseAbstractHydration
         /** @var Type|null $type */
         $type = $this->hydrateColumnInfo($rowKey)['type'] ?? null;
 
-        return $type !== null ? $type->convertToPHPValue($value, $this->_platform) : $value;
+        return $type !== null ? $type->convertToPHPValue($value, $this->platform) : $value;
     }
 
     protected function getPrimaryId(array $row, array $data, string $entityMappingsKey): string|int
     {
         /** @var ResultSetMapping $resultSetMapping */
-        $resultSetMapping = $this->_rsm;
+        $resultSetMapping = $this->rsm;
         $mappingsKeyData = $data[$entityMappingsKey];
         $primaryId = null;
 
@@ -274,7 +274,7 @@ class AbstractEntityHydration extends BaseAbstractHydration
     protected function initDtoClass(): void
     {
         /** @var ResultSetMapping $resultSetMapping */
-        $resultSetMapping = $this->_rsm;
+        $resultSetMapping = $this->rsm;
 
         $entityMappingsKey = array_key_first($resultSetMapping->entityMappings);
         $entityClass = $resultSetMapping->aliasMap[$entityMappingsKey];

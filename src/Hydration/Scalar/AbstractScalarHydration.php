@@ -19,9 +19,9 @@ class AbstractScalarHydration extends BaseAbstractHydration
 
     public static ?string $dtoClass = null;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $em)
     {
-        parent::__construct($entityManager);
+        parent::__construct($em);
 
         $this->propertyAccessor = PropertyAccess::createPropertyAccessorBuilder()
             ->enableMagicMethods()
@@ -100,7 +100,7 @@ class AbstractScalarHydration extends BaseAbstractHydration
                 throw new LogicException($message);
             }
 
-            $result[$fieldName] = $type->convertToPHPValue($value, $this->_platform);
+            $result[$fieldName] = $type->convertToPHPValue($value, $this->platform);
         }
 
         return $result;
