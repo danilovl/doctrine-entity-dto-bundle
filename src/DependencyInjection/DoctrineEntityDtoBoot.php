@@ -51,6 +51,7 @@ class DoctrineEntityDtoBoot
         }
 
         $metadataFactory = $entityManager->getMetadataFactory();
+        /** @var object[] $metadata */
         $metadata = $metadataFactory->getAllMetadata();
 
         $result = [];

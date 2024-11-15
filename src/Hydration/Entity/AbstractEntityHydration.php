@@ -74,6 +74,7 @@ class AbstractEntityHydration extends BaseAbstractHydration
         ];
 
         $resultKey = $this->dtoClass . ':' . $primaryId;
+        /** @var object|null $dto */
         $dto = $result[$resultKey] ?? null;
 
         if ($dto === null) {
@@ -95,9 +96,7 @@ class AbstractEntityHydration extends BaseAbstractHydration
                 $this->propertyAccessor->setValue($dto, $fieldName, $finalValue);
             }
 
-            if (is_array($children)) {
-                $this->createChildDTO($children, $entityMappingsKeyData, $row, $dto);
-            }
+            $this->createChildDTO($children, $entityMappingsKeyData, $row, $dto);
         }
 
         $result[$resultKey] = $dto;
@@ -127,13 +126,13 @@ class AbstractEntityHydration extends BaseAbstractHydration
             $targetEntity = $resultSetMapping->aliasMap[$parentFieldName];
             $relationFieldName = $resultSetMapping->relationMap[$parentFieldName];
 
-            /** @var string $parentObjectClassName */
             $parentObjectClassName = get_class($parentObject);
             if (str_contains($parentObjectClassName, $this->getRuntimeClassSuffix())) {
                 $parentObjectClassName = get_parent_class($parentObject);
             }
 
             $mapping = $this->metadataCache[$parentObjectClassName];
+            /** @var array{type: int}|null $associationMapping */
             $associationMapping = $mapping->associationMappings[$relationFieldName] ?? null;
 
             $isReadable = $this->propertyAccessor->isReadable($parentObject, $relationFieldName);
@@ -174,7 +173,7 @@ class AbstractEntityHydration extends BaseAbstractHydration
             if (!$isReadable) {
                 $childEntity = $this->createClassInstance($targetEntity);
             } else {
-                /** @var object $childEntity */
+                /** @var object|null $childEntity */
                 $childEntity = $this->propertyAccessor->getValue($parentObject, $relationFieldName);
 
                 if ($childEntity === null) {
