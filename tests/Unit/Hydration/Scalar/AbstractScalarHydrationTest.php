@@ -95,7 +95,7 @@ class AbstractScalarHydrationTest extends TestCase
         $this->abstractScalarHydrationMock->publicHydrateRowData([], $result);
     }
 
-    #[DataProvider('dataExceptionAlreadyExistsField')]
+    #[DataProvider('provideExceptionAlreadyExistsFieldCases')]
     public function testExceptionAlreadyExistsField(array $row, string $fieldName): void
     {
         $this->expectException(LogicException::class);
@@ -109,7 +109,7 @@ class AbstractScalarHydrationTest extends TestCase
         $this->abstractScalarHydrationMock->publicHydrateRowData($row, $result);
     }
 
-    #[DataProvider('dataHydrateRowDataSucceed')]
+    #[DataProvider('provideHydrateRowDataSucceedCases')]
     public function testHydrateRowDataSucceed(array $row, ScalarDTOMock $expectedDTO): void
     {
         $result = [];
@@ -122,7 +122,7 @@ class AbstractScalarHydrationTest extends TestCase
         $this->assertEquals($expectedResult, $result);
     }
 
-    #[DataProvider('dataHydrateRowDataFailed')]
+    #[DataProvider('provideHydrateRowDataFailedCases')]
     public function testHydrateRowDataFailed(array $row, ScalarDTOMock $expectedDTO): void
     {
         $this->expectException(ArgumentCountError::class);
@@ -137,7 +137,7 @@ class AbstractScalarHydrationTest extends TestCase
         $this->assertEquals($expectedResult, $result);
     }
 
-    public static function dataHydrateRowDataSucceed(): Generator
+    public static function provideHydrateRowDataSucceedCases(): Generator
     {
         $scalarDTOMock = new ScalarDTOMock(59, true, 'Simple name', 'Simple description', false, false, new DateTime('2018-04-28'));
 
@@ -168,7 +168,7 @@ class AbstractScalarHydrationTest extends TestCase
         ], $scalarDTOMock];
     }
 
-    public static function dataHydrateRowDataFailed(): Generator
+    public static function provideHydrateRowDataFailedCases(): Generator
     {
         $scalarDTOMock = new ScalarDTOMock(1, true, 'Simple name', 'Simple description', true, true, new DateTime('2018-04-28'));
 
@@ -200,7 +200,7 @@ class AbstractScalarHydrationTest extends TestCase
         ], $scalarDTOMock];
     }
 
-    public static function dataExceptionAlreadyExistsField(): Generator
+    public static function provideExceptionAlreadyExistsFieldCases(): Generator
     {
         yield [[
             'complete_0' => 0,
