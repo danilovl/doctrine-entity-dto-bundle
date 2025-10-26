@@ -11,12 +11,12 @@ use Doctrine\DBAL\Types\{
     DateTimeType,
     IntegerType
 };
-use Doctrine\DBAL\Platforms\MySQL84Platform;
+use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\ORM\Query\ResultSetMapping;
 
 class AbstractScalarHydrationMock extends AbstractScalarHydration
 {
-    public function __construct(ResultSetMapping $rsm, MySQL84Platform $platform)
+    public function __construct(ResultSetMapping $rsm, MySQLPlatform $platform)
     {
         $this->rsm = $rsm;
         $this->platform = $platform;

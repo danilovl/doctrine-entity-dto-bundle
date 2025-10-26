@@ -1,16 +1,37 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Parameter \\#1 \\$objectOrClass of class ReflectionClass constructor expects class\\-string\\<T of object\\>\\|T of object, string given\\.$#"
+			message: '#^Offset class\-string\|false might not exist on array\<string, Doctrine\\ORM\\Mapping\\ClassMetadata\<object\>\>\.$#'
+			identifier: offsetAccess.notFound
 			count: 1
 			path: src/Hydration/Entity/AbstractEntityHydration.php
 
 		-
-			message: "#^Parameter \\#1 \\$string of function md5 expects string, string\\|false given\\.$#"
+			message: '#^Parameter \#1 \$objectOrClass of class ReflectionClass constructor expects class\-string\<T of object\>\|T of object, string given\.$#'
+			identifier: argument.type
 			count: 1
 			path: src/Hydration/Entity/AbstractEntityHydration.php
 
 		-
-			message: "#^Parameter \\#1 \\$objectOrClass of class ReflectionClass constructor expects class\\-string\\<T of object\\>\\|T of object, string given\\.$#"
+			message: '#^Parameter \#1 \$string of function md5 expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Hydration/Entity/AbstractEntityHydration.php
+
+		-
+			message: '#^Parameter \#1 \$objectOrClass of class ReflectionClass constructor expects class\-string\<T of object\>\|T of object, string given\.$#'
+			identifier: argument.type
 			count: 1
 			path: src/Hydration/Scalar/AbstractScalarHydration.php
+
+		-
+			message: '#^Parameter \#1 \$rsm \(Doctrine\\ORM\\Query\\ResultSetMapping\) of method Danilovl\\DoctrineEntityDtoBundle\\Tests\\Mock\\Hydration\\Scalar\\AbstractScalarHydrationMock\:\:__construct\(\) is not contravariant with parameter \#1 \$em \(Doctrine\\ORM\\EntityManagerInterface\) of method Doctrine\\ORM\\Internal\\Hydration\\AbstractHydrator\:\:__construct\(\)\.$#'
+			identifier: method.childParameterType
+			count: 1
+			path: tests/Mock/Hydration/Scalar/AbstractScalarHydrationMock.php
+
+		-
+			message: '#^Parameter \#2 \$platform of method Danilovl\\DoctrineEntityDtoBundle\\Tests\\Mock\\Hydration\\Scalar\\AbstractScalarHydrationMock\:\:__construct\(\) is not optional\.$#'
+			identifier: parameter.notOptional
+			count: 1
+			path: tests/Mock/Hydration/Scalar/AbstractScalarHydrationMock.php
