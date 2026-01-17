@@ -20,19 +20,19 @@
         }
     },
     "require": {
-        "php": "^8.3",
-        "symfony/framework-bundle": "^7.0",
-        "doctrine/doctrine-bundle": "^2.15 | ^3.0",
+        "php": "^8.5",
+        "symfony/framework-bundle": "^8.0",
+        "doctrine/doctrine-bundle": "^3.0",
         "doctrine/orm": "^3.3",
-        "symfony/finder": "^7.0",
-        "symfony/property-access": "^7.0"
+        "symfony/finder": "^8.0",
+        "symfony/property-access": "^8.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^10.2",
+        "phpunit/phpunit": "^12.5.6",
         "phpstan/extension-installer": "^1.4.3",
-        "phpstan/phpstan": "^2.0.1",
-        "phpstan/phpstan-symfony": "^2.0.0",
-        "friendsofphp/php-cs-fixer": "^3.86"
+        "phpstan/phpstan": "^2.1.33",
+        "phpstan/phpstan-symfony": "^2.0.9",
+        "friendsofphp/php-cs-fixer": "^3.92.5"
     },
     "scripts": {
         "tests": "vendor/bin/phpunit tests",

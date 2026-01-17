@@ -275,6 +275,7 @@ class AbstractEntityHydration extends BaseAbstractHydration
         /** @var ResultSetMapping $resultSetMapping */
         $resultSetMapping = $this->rsm;
 
+        /** @var string $entityMappingsKey */
         $entityMappingsKey = array_key_first($resultSetMapping->entityMappings);
         $entityClass = $resultSetMapping->aliasMap[$entityMappingsKey];
         $this->dtoClass = $entityClass;

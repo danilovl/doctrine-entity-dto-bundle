@@ -11,9 +11,9 @@ The Symfony bundle provides a simple mechanism to convert Doctrine entities to D
 
 ### Requirements
 
-* PHP 8.3 or higher
-* Symfony 7.0 or higher
-* Doctrine 2
+* PHP 8.5 or higher
+* Symfony 8.0 or higher
+* Doctrine 3
 
 ### 1. Installation
 
