@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Offset class\-string\|false might not exist on array\<string, Doctrine\\ORM\\Mapping\\ClassMetadata\<object\>\>\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Hydration/Entity/AbstractEntityHydration.php
-
-		-
 			message: '#^Parameter \#1 \$objectOrClass of class ReflectionClass constructor expects class\-string\<T of object\>\|T of object, string given\.$#'
 			identifier: argument.type
 			count: 1

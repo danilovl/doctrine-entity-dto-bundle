@@ -128,23 +128,26 @@ class AbstractEntityHydration extends BaseAbstractHydration
 
             $parentObjectClassName = get_class($parentObject);
             if (str_contains($parentObjectClassName, $this->getRuntimeClassSuffix())) {
-                $parentObjectClassName = get_parent_class($parentObject);
+                $parentClass = get_parent_class($parentObject);
+                if ($parentClass !== false) {
+                    $parentObjectClassName = $parentClass;
+                }
             }
 
-            $mapping = $this->metadataCache[$parentObjectClassName];
+            $mapping = $this->metadataCache[$parentObjectClassName] ?? null;
+            if ($mapping === null && ($this->em->getMetadataFactory()->hasMetadataFor($parentObjectClassName) || !$this->em->getMetadataFactory()->isTransient($parentObjectClassName))) {
+                $mapping = $this->getClassMetadata($parentObjectClassName);
+            }
+
             /** @var array{type: int}|null $associationMapping */
-            $associationMapping = $mapping->associationMappings[$relationFieldName] ?? null;
+            $associationMapping = $mapping?->associationMappings[$relationFieldName] ?? null;
 
-            $isReadable = $this->propertyAccessor->isReadable($parentObject, $relationFieldName);
-
-            if ($associationMapping && !($associationMapping['type'] & ClassMetadata::TO_ONE)) {
-                $collection = new ArrayCollection;
-
-                if ($isReadable) {
-                    /** @var Collection $collection */
-                    $collection = $this->propertyAccessor->getValue($parentObject, $relationFieldName);
-                } else {
-                    $this->propertyAccessor->setValue($parentObject, $relationFieldName, $collection);
+            if ($mapping !== null && $associationMapping && !($associationMapping['type'] & ClassMetadata::TO_ONE)) {
+                /** @var Collection|null $collection */
+                $collection = $mapping->getFieldValue($parentObject, $relationFieldName);
+                if (!$collection instanceof Collection) {
+                    $collection = new ArrayCollection;
+                    $mapping->setFieldValue($parentObject, $relationFieldName, $collection);
                 }
 
                 $childEntity = $this->createClassInstance($targetEntity);
@@ -169,6 +172,8 @@ class AbstractEntityHydration extends BaseAbstractHydration
 
                 continue;
             }
+
+            $isReadable = $this->propertyAccessor->isReadable($parentObject, $relationFieldName);
 
             if (!$isReadable) {
                 $childEntity = $this->createClassInstance($targetEntity);
@@ -302,6 +307,42 @@ class AbstractEntityHydration extends BaseAbstractHydration
 
     protected function createClassInstance(string $class): object
     {
-        return (new ReflectionClass($class))->newInstanceWithoutConstructor();
+        $instance = (new ReflectionClass($class))->newInstanceWithoutConstructor();
+        $this->initCollections($instance, $class);
+
+        return $instance;
+    }
+
+    protected function initCollections(object $instance, string $class): void
+    {
+        $entityClass = $class;
+        if (str_contains($class, $this->getRuntimeClassSuffix())) {
+            $parentClass = get_parent_class($class);
+            if ($parentClass === false) {
+                return;
+            }
+
+            $entityClass = $parentClass;
+        }
+
+        if (!class_exists($entityClass)) {
+            return;
+        }
+
+        $mapping = $this->metadataCache[$entityClass] ?? null;
+        if ($mapping === null && ($this->em->getMetadataFactory()->hasMetadataFor($entityClass) || !$this->em->getMetadataFactory()->isTransient($entityClass))) {
+            $mapping = $this->getClassMetadata($entityClass);
+        }
+
+        if ($mapping === null) {
+            return;
+        }
+
+        foreach ($mapping->associationMappings as $fieldName => $associationMapping) {
+            /** @var array{type: int} $associationMapping */
+            if (!($associationMapping['type'] & ClassMetadata::TO_ONE)) {
+                $mapping->setFieldValue($instance, $fieldName, new ArrayCollection);
+            }
+        }
     }
 }
