@@ -95,6 +95,45 @@ class AbstractScalarHydrationTest extends TestCase
         $this->abstractScalarHydrationMock->publicHydrateRowData([], $result);
     }
 
+    public function testPrepareConsumesStaticDtoClass(): void
+    {
+        $this->abstractScalarHydrationMock::$dtoClass = ScalarDTOMock::class;
+        $this->abstractScalarHydrationMock->publicPrepare();
+
+        $this->assertNull($this->abstractScalarHydrationMock::$dtoClass);
+
+        $result = [];
+        $this->abstractScalarHydrationMock->publicHydrateRowData($this->createSucceedRow(), $result);
+
+        $this->assertInstanceOf(ScalarDTOMock::class, $result[0]);
+    }
+
+    public function testHintDtoClassHasPriorityOverStaticDtoClass(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('DTO class is not in scalar DTOs.');
+
+        $this->abstractScalarHydrationMock::$dtoClass = ScalarDTOMock::class;
+        $this->abstractScalarHydrationMock->publicPrepare([
+            AbstractScalarHydrationMock::HINT_DTO_CLASS => stdClass::class
+        ]);
+
+        $result = [];
+        $this->abstractScalarHydrationMock->publicHydrateRowData($this->createSucceedRow(), $result);
+    }
+
+    public function testDtoClassIsNotSetAfterPrepare(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('DTO class is not set.');
+
+        $this->abstractScalarHydrationMock::$dtoClass = null;
+        $this->abstractScalarHydrationMock->publicPrepare();
+
+        $result = [];
+        $this->abstractScalarHydrationMock->publicHydrateRowData([], $result);
+    }
+
     #[DataProvider('provideExceptionAlreadyExistsFieldCases')]
     public function testExceptionAlreadyExistsField(array $row, string $fieldName): void
     {
@@ -135,6 +174,21 @@ class AbstractScalarHydrationTest extends TestCase
         $expectedResult = [$expectedDTO];
 
         $this->assertEquals($expectedResult, $result);
+    }
+
+    private function createSucceedRow(): array
+    {
+        return [
+            'complete_0' => 0,
+            'notify_complete_1' => 0,
+            'deadline_2' => '2018-04-28',
+            'id_3' => 59,
+            'name_4' => 'Simple name',
+            'description_5' => 'Simple description',
+            'active_6' => 1,
+            'created_at_7' => '2018-04-07 19:09:17',
+            'updated_at_8' => '2019-03-06 20:12:48'
+        ];
     }
 
     public static function provideHydrateRowDataSucceedCases(): Generator

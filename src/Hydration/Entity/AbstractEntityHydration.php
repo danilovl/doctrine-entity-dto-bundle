@@ -14,6 +14,7 @@ use Doctrine\ORM\Internal\Hydration\AbstractHydrator as BaseAbstractHydration;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query\ResultSetMapping;
 use ReflectionClass;
+use WeakMap;
 use Symfony\Component\PropertyAccess\{
     PropertyAccess,
     PropertyAccessorInterface
@@ -25,12 +26,14 @@ class AbstractEntityHydration extends BaseAbstractHydration
 
     protected string $dtoClass;
 
-    protected array $collectionMapping = [];
+    /** @var WeakMap<object, array<string, array<string|int, object>>> */
+    protected WeakMap $collectionMapping;
 
     public function __construct(EntityManagerInterface $em)
     {
         parent::__construct($em);
 
+        $this->collectionMapping = new WeakMap;
         $this->propertyAccessor = PropertyAccess::createPropertyAccessorBuilder()
             ->enableMagicMethods()
             ->getPropertyAccessor();
@@ -45,6 +48,13 @@ class AbstractEntityHydration extends BaseAbstractHydration
         }
 
         return array_values($result);
+    }
+
+    protected function cleanup(): void
+    {
+        parent::cleanup();
+
+        $this->collectionMapping = new WeakMap;
     }
 
     protected function hydrateRowData(array $row, array &$result): void
@@ -154,16 +164,18 @@ class AbstractEntityHydration extends BaseAbstractHydration
                 $isSetValue = $this->setRowValuesToEntity($rowKeys, $row, $childEntity);
 
                 $identifier = $this->getPrimaryId($row, $data, $parentFieldName);
-                $isInCollection = $this->collectionMapping[$parentObjectClassName][$targetEntity][$identifier] ?? null;
+                $this->collectionMapping[$parentObject] ??= [];
+                /** @var object|null $existingChildEntity */
+                $existingChildEntity = $this->collectionMapping[$parentObject][$relationFieldName][$identifier] ?? null;
 
-                if ($isInCollection) {
-                    continue;
+                if ($existingChildEntity !== null) {
+                    $childEntity = $existingChildEntity;
                 } else {
-                    $this->collectionMapping[$parentObjectClassName][$targetEntity][$identifier] = true;
-                }
+                    $this->collectionMapping[$parentObject][$relationFieldName][$identifier] = $childEntity;
 
-                if ($isSetValue) {
-                    $collection->add($childEntity);
+                    if ($isSetValue) {
+                        $collection->add($childEntity);
+                    }
                 }
 
                 if (is_array($children)) {
@@ -289,14 +301,28 @@ class AbstractEntityHydration extends BaseAbstractHydration
             return;
         }
 
-        $shortName = (new ReflectionClass($entityClass))->getShortName();
-        $this->dtoClass = sprintf('%s%s', $shortName, $this->getRuntimeClassSuffix());
-
-        if (class_exists($this->dtoClass)) {
+        $reflectionClass = new ReflectionClass($entityClass);
+        if ($reflectionClass->isFinal()) {
             return;
         }
 
-        $classDefinition = sprintf('class %s extends %s {};', $this->dtoClass, $entityClass);
+        $shortName = $reflectionClass->getShortName();
+        $dtoClass = sprintf('%s%s', $shortName, $this->getRuntimeClassSuffix());
+
+        $isDtoClassOccupied = class_exists($dtoClass, false) && get_parent_class($dtoClass) !== $entityClass;
+        if ($isDtoClassOccupied) {
+            $entityClassHash = mb_substr(md5($entityClass), 0, 8);
+            $dtoClass = sprintf('%s%s%s', $shortName, $entityClassHash, $this->getRuntimeClassSuffix());
+        }
+
+        $this->dtoClass = $dtoClass;
+
+        if (class_exists($dtoClass, false)) {
+            return;
+        }
+
+        $classModifier = $reflectionClass->isReadOnly() ? 'readonly ' : '';
+        $classDefinition = sprintf('%sclass %s extends \\%s {};', $classModifier, $dtoClass, $entityClass);
         eval($classDefinition);
     }
 

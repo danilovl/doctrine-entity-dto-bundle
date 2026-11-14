@@ -27,6 +27,12 @@ class AbstractScalarHydrationMock extends AbstractScalarHydration
         $this->hydrateRowData($row, $result);
     }
 
+    public function publicPrepare(array $hints = []): void
+    {
+        $this->hints = $hints;
+        $this->prepare();
+    }
+
     protected function hydrateColumnInfo($key): ?array
     {
         $columnInfo = [

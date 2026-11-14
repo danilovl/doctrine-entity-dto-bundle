@@ -11,10 +11,18 @@ use Danilovl\DoctrineEntityDtoBundle\Tests\Mock\Hydration\Entity\{
     AbstractEntityHydrationMock
 };
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Cache\ArrayResult;
+use Doctrine\DBAL\{
+    DriverManager,
+    Result
+};
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\ORM\{EntityManager, EntityManagerInterface, ORMSetup};
+use Doctrine\ORM\{
+    EntityManager,
+    EntityManagerInterface,
+    ORMSetup
+};
 use Doctrine\ORM\Query\ResultSetMapping;
 use PHPUnit\Framework\TestCase;
 use stdClass;
@@ -266,5 +274,115 @@ class AbstractEntityHydrationTest extends TestCase
         $item = $cheque->getItems()->first();
         $this->assertSame(1_000, $item->getId());
         $this->assertSame('Milk', $item->getTitle());
+    }
+
+    public function testSharedChildIsAddedToCollectionOfEveryParent(): void
+    {
+        $rsm = $this->createShopChequeItemResultSetMapping();
+        $hydrator = $this->createShopChequeItemHydrator($rsm);
+
+        $rows = [
+            ['s_id' => 1, 's_name' => 'Shop 1', 'ch_id' => 100, 'ch_number' => 'CH-100', 'ci_id' => null, 'ci_title' => null],
+            ['s_id' => 2, 's_name' => 'Shop 2', 'ch_id' => 100, 'ch_number' => 'CH-100', 'ci_id' => null, 'ci_title' => null],
+        ];
+
+        $result = [];
+        foreach ($rows as $row) {
+            $hydrator->publicHydrateRowData($row, $result);
+        }
+
+        $this->assertCount(2, $result);
+
+        /** @var Shop[] $shops */
+        $shops = array_values($result);
+        $this->assertCount(1, $shops[0]->getCheques());
+        $this->assertCount(1, $shops[1]->getCheques());
+
+        foreach ($shops as $shop) {
+            $cheque = $shop->getCheques()->first();
+            $this->assertInstanceOf(Cheque::class, $cheque);
+            $this->assertSame(100, $cheque->getId());
+        }
+    }
+
+    public function testNestedChildrenOfAlreadySeenChildAreHydrated(): void
+    {
+        $rsm = $this->createShopChequeItemResultSetMapping();
+        $hydrator = $this->createShopChequeItemHydrator($rsm);
+
+        $rows = [
+            ['s_id' => 1, 's_name' => 'Shop 1', 'ch_id' => 100, 'ch_number' => 'CH-100', 'ci_id' => 1_000, 'ci_title' => 'Milk'],
+            ['s_id' => 1, 's_name' => 'Shop 1', 'ch_id' => 100, 'ch_number' => 'CH-100', 'ci_id' => 1_001, 'ci_title' => 'Bread'],
+        ];
+
+        $result = [];
+        foreach ($rows as $row) {
+            $hydrator->publicHydrateRowData($row, $result);
+        }
+
+        /** @var Shop $shop */
+        $shop = reset($result);
+        $this->assertCount(1, $shop->getCheques());
+
+        /** @var Cheque $cheque */
+        $cheque = $shop->getCheques()->first();
+        $this->assertCount(2, $cheque->getItems());
+        $this->assertSame(['Milk', 'Bread'], $cheque->getItems()->map(static fn (ChequeItem $item): string => $item->getTitle())->getValues());
+    }
+
+    public function testToIterableAddsSharedChildToEveryParent(): void
+    {
+        $rsm = $this->createShopChequeItemResultSetMapping();
+        $hydrator = $this->createShopChequeItemHydrator($rsm);
+
+        $columns = ['s_id', 's_name', 'ch_id', 'ch_number', 'ci_id', 'ci_title'];
+        $rows = [
+            [1, 'Shop 1', 100, 'CH-100', null, null],
+            [2, 'Shop 2', 100, 'CH-100', null, null],
+            [3, 'Shop 3', 100, 'CH-100', null, null],
+        ];
+
+        $statement = new Result(new ArrayResult($columns, $rows), $this->entityManager->getConnection());
+
+        $chequeCounts = [];
+        /** @var Shop $shop */
+        foreach ($hydrator->toIterable($statement, $rsm) as $shop) {
+            $chequeCounts[$shop->getId()] = $shop->getCheques()->count();
+        }
+
+        $this->assertSame([1 => 1, 2 => 1, 3 => 1], $chequeCounts);
+    }
+
+    private function createShopChequeItemResultSetMapping(): ResultSetMapping
+    {
+        $rsm = new ResultSetMapping;
+        $rsm->addEntityResult(Shop::class, 's');
+        $rsm->addFieldResult('s', 's_id', 'id');
+        $rsm->addFieldResult('s', 's_name', 'name');
+
+        $rsm->addJoinedEntityResult(Cheque::class, 'ch', 's', 'cheques');
+        $rsm->addFieldResult('ch', 'ch_id', 'id');
+        $rsm->addFieldResult('ch', 'ch_number', 'number');
+
+        $rsm->addJoinedEntityResult(ChequeItem::class, 'ci', 'ch', 'items');
+        $rsm->addFieldResult('ci', 'ci_id', 'id');
+        $rsm->addFieldResult('ci', 'ci_title', 'title');
+
+        return $rsm;
+    }
+
+    private function createShopChequeItemHydrator(ResultSetMapping $rsm): AbstractEntityHydrationMock
+    {
+        $hydrator = new AbstractEntityHydrationMock($this->entityManager, $rsm, $this->platform);
+        $hydrator->columnInfo = [
+            's_id' => ['isIdentifier' => true, 'type' => Type::getType('integer')],
+            's_name' => ['isIdentifier' => false, 'type' => Type::getType('string')],
+            'ch_id' => ['isIdentifier' => true, 'type' => Type::getType('integer')],
+            'ch_number' => ['isIdentifier' => false, 'type' => Type::getType('string')],
+            'ci_id' => ['isIdentifier' => true, 'type' => Type::getType('integer')],
+            'ci_title' => ['isIdentifier' => false, 'type' => Type::getType('string')],
+        ];
+
+        return $hydrator;
     }
 }

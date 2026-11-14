@@ -17,7 +17,11 @@ class AbstractScalarHydration extends BaseAbstractHydration
 {
     protected readonly PropertyAccessorInterface $propertyAccessor;
 
+    public const string HINT_DTO_CLASS = 'danilovl_doctrine_entity_dto.dto_class';
+
     public static ?string $dtoClass = null;
+
+    protected ?string $resolvedDtoClass = null;
 
     public function __construct(EntityManagerInterface $em)
     {
@@ -28,6 +32,24 @@ class AbstractScalarHydration extends BaseAbstractHydration
             ->getPropertyAccessor();
     }
 
+    protected function prepare(): void
+    {
+        parent::prepare();
+
+        /** @var string|null $dtoClass */
+        $dtoClass = $this->hints[self::HINT_DTO_CLASS] ?? self::$dtoClass;
+        $this->resolvedDtoClass = $dtoClass;
+        self::$dtoClass = null;
+    }
+
+    protected function cleanup(): void
+    {
+        parent::cleanup();
+
+        $this->resolvedDtoClass = null;
+        self::$dtoClass = null;
+    }
+
     protected function hydrateAllData(): array
     {
         $result = [];
@@ -36,24 +58,31 @@ class AbstractScalarHydration extends BaseAbstractHydration
             $this->hydrateRowData($row, $result);
         }
 
-        self::$dtoClass = null;
-
         return array_values($result);
+    }
+
+    protected function getDtoClass(): string
+    {
+        /** @var string|null $dtoClass */
+        $dtoClass = $this->resolvedDtoClass ?? $this->hints[self::HINT_DTO_CLASS] ?? self::$dtoClass;
+        if ($dtoClass === null) {
+            throw new LogicException('DTO class is not set.');
+        }
+
+        return $dtoClass;
     }
 
     protected function hydrateRowData(array $row, array &$result): void
     {
-        if (self::$dtoClass === null) {
-            throw new LogicException('DTO class is not set.');
-        }
+        $dtoClass = $this->getDtoClass();
 
-        if (!in_array(self::$dtoClass, ConfigurationService::getScalarDTO(), true)) {
+        if (!in_array($dtoClass, ConfigurationService::getScalarDTO(), true)) {
             throw new LogicException('DTO class is not in scalar DTOs.');
         }
 
         $rowData = $this->prepareRowData($row);
 
-        $reflectionClass = new ReflectionClass(self::$dtoClass);
+        $reflectionClass = new ReflectionClass($dtoClass);
         $reflectionConstructor = $reflectionClass->getConstructor();
 
         $data = [];

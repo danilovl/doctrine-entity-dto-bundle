@@ -17,7 +17,7 @@ class ConfigurationService
     ) {
         self::$staticParameters = [
             'isEnableEntityRuntimeNameDTO' => $isEnableEntityRuntimeNameDTO,
-            'scalarDTO' => $isEnableEntityDTO
+            'scalarDTO' => $scalarDTO
         ];
     }
 
